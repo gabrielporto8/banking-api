@@ -1,6 +1,8 @@
 package services
 
 import (
+	"time"
+
 	"github.com/gabrielporto8/stone-challenge/app/models"
 	"github.com/gabrielporto8/stone-challenge/app/repositories"
 )
@@ -48,6 +50,7 @@ func (s TransferService) CreateTransfer(transfer *models.Transfer) bool {
 		return false
 	}
 
+	transfer.CreatedAt = time.Now()
 	success := s.transferRepository.SaveTransfer(transfer)
 	if !success {
 		return false
