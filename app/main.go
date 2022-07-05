@@ -25,8 +25,6 @@ func main() {
 	r.HandleFunc("/accounts/{id}/balance", accountHandler.GetBalance).Methods("GET")
 	r.HandleFunc("/transfers", transferHandler.GetTransfers).Methods("GET")
 	r.HandleFunc("/transfers", transferHandler.CreateTransfer).Methods("POST")
-
-	r.HandleFunc("/login", handlers.GenerateToken)
 	
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
