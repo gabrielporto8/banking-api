@@ -1,4 +1,4 @@
-module github.com/gabrielporto8/stone-challenge
+module github.com/gabrielporto8/banking-api
 
 go 1.18
 

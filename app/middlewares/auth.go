@@ -3,7 +3,7 @@ package middlewares
 import (
 	"net/http"
 
-	"github.com/gabrielporto8/stone-challenge/app/services"
+	"github.com/gabrielporto8/banking-api/app/services"
 )
 
 func AuthMiddleware(next http.Handler) http.Handler {

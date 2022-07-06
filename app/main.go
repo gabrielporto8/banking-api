@@ -4,10 +4,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gabrielporto8/stone-challenge/app/handlers"
-	"github.com/gabrielporto8/stone-challenge/app/middlewares"
-	"github.com/gabrielporto8/stone-challenge/app/repositories"
-	"github.com/gabrielporto8/stone-challenge/app/services"
+	"github.com/gabrielporto8/banking-api/app/handlers"
+	"github.com/gabrielporto8/banking-api/app/middlewares"
+	"github.com/gabrielporto8/banking-api/app/repositories"
+	"github.com/gabrielporto8/banking-api/app/services"
 	"github.com/gorilla/mux"
 )
 

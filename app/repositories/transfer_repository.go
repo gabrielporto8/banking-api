@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"github.com/gabrielporto8/stone-challenge/app/models"
+	"github.com/gabrielporto8/banking-api/app/models"
 )
 
 var (

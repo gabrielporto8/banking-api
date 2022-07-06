@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gabrielporto8/stone-challenge/app/models"
-	"github.com/gabrielporto8/stone-challenge/app/services"
+	"github.com/gabrielporto8/banking-api/app/models"
+	"github.com/gabrielporto8/banking-api/app/services"
 )
 
 type AuthHandler struct {

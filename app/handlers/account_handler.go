@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gabrielporto8/stone-challenge/app/models"
-	"github.com/gabrielporto8/stone-challenge/app/services"
+	"github.com/gabrielporto8/banking-api/app/models"
+	"github.com/gabrielporto8/banking-api/app/services"
 	"github.com/gorilla/mux"
 )
 
