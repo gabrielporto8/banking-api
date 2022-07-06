@@ -31,10 +31,10 @@ func (r TransferRepository) GetTransfersByOriginID(ID int64) []models.Transfer {
 	return transfersFound
 }
 
-func (r TransferRepository) SaveTransfer(transfer *models.Transfer) bool {
+func (r TransferRepository) SaveTransfer(transfer *models.Transfer) error {
 	transfer.ID = transfersLastID
 	transfers[transfersLastID] = transfer
 	transfersLastID++
 
-	return true
+	return nil
 }

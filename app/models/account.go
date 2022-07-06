@@ -1,9 +1,17 @@
 package models
 
 import (
+	"errors"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
+)
+
+var (
+	ErrAccountNotFound = errors.New("account not found")
+	ErrAccountOriginNotFound = errors.New("account origin not found")
+	ErrAccountDestinationNotFound = errors.New("account destination not found")
+	ErrInsufficientBalance = errors.New("origin account does not have sufficient balance")
 )
 
 type Account struct {

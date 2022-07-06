@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"time"
+
 	"github.com/gabrielporto8/stone-challenge/app/models"
 )
 
@@ -15,38 +17,52 @@ func NewAccountRepository() *AccountRepository {
 	return &AccountRepository{}
 }
 
-func (r AccountRepository) GetAccountByID(ID int64) (*models.Account, bool) {
+func (r AccountRepository) GetAccountByID(ID int64) (*models.Account, error) {
 	accs, ok := accounts[ID]
-	return accs, ok
+	if !ok {
+		return nil, models.ErrAccountNotFound
+	}
+	return accs, nil
+}
+
+func (r AccountRepository) GetAccountByCPF(cpf string) (*models.Account, error) {
+	for _, acc := range accounts {
+		if acc.Cpf == cpf {
+			return acc, nil
+		}
+	}
+
+	return nil, models.ErrAccountNotFound
 }
 
 func (r AccountRepository) GetAccounts() map[int64]*models.Account {
 	return accounts
 }
 
-func (r AccountRepository) GetBalance(ID int64) (float64, bool) {
+func (r AccountRepository) GetBalance(ID int64) (float64, error) {
 	account, ok := accounts[ID]
 	if !ok {
-		return 0, ok
+		return 0, models.ErrAccountNotFound
 	}
 
-	return account.Balance, ok
+	return account.Balance, nil
 }
 
-func (r AccountRepository) SaveAccount(account *models.Account) bool {
+func (r AccountRepository) SaveAccount(account *models.Account) error {
 	account.ID = accountsLastID
+	account.CreatedAt = time.Now()
 	accounts[accountsLastID] = account
 	accountsLastID++
 
-	return true
+	return nil
 }
 
-func (r AccountRepository) UpdateAccount(account *models.Account) bool {
+func (r AccountRepository) UpdateAccount(account *models.Account) (*models.Account, error) {
 	_, ok := accounts[account.ID]
 	if !ok {
-		return false
+		return nil, models.ErrAccountNotFound
 	}
 
 	accounts[account.ID] = account
-	return true
+	return account, nil
 }

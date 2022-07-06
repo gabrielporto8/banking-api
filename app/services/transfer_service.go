@@ -27,38 +27,38 @@ func (s TransferService) GetTransfersByOriginID(ID int64) []models.Transfer {
 	return s.transferRepository.GetTransfersByOriginID(ID)
 }
 
-func (s TransferService) CreateTransfer(transfer *models.Transfer) bool {
+func (s TransferService) CreateTransfer(transfer *models.Transfer) error {
 	if transfer.AccountOriginID == transfer.AccountDestinationID {
-		return false
+		return models.ErrSameAccountID
 	}
 
 	if transfer.Amount <= 0 {
-		return false
+		return models.ErrInvalidAmount
 	}
 
-	accountOrigin, ok := s.accountService.GetAccountByID(transfer.AccountOriginID)
-	if !ok {
-		return false
+	accountOrigin, err := s.accountService.GetAccountByID(transfer.AccountOriginID)
+	if err != nil {
+		return err
 	}
 
-	accountDestination, ok := s.accountService.GetAccountByID(transfer.AccountDestinationID)
-	if !ok {
-		return false
+	accountDestination, err := s.accountService.GetAccountByID(transfer.AccountDestinationID)
+	if err != nil {
+		return err
 	}
 
 	if accountOrigin.Balance < transfer.Amount {
-		return false
+		return models.ErrInsufficientBalance
 	}
 
 	transfer.CreatedAt = time.Now()
-	success := s.transferRepository.SaveTransfer(transfer)
-	if !success {
-		return false
+	err = s.transferRepository.SaveTransfer(transfer)
+	if err != nil {
+		return err
 	}
 
 	accountOrigin.Balance, accountDestination.Balance = accountOrigin.Balance - transfer.Amount, accountDestination.Balance + transfer.Amount
 	s.accountService.UpdateAccount(accountOrigin)
 	s.accountService.UpdateAccount(accountDestination)
-	
-	return true
+
+	return nil
 }

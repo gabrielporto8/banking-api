@@ -36,9 +36,9 @@ func (h TransferHandler) CreateTransfer(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	created := h.transferService.CreateTransfer(&transfer)
-	if !created {
-		log.Printf("Error creating the transfer.")
+	err = h.transferService.CreateTransfer(&transfer)
+	if err != nil {
+		log.Printf("Error creating the transfer: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Error creating the transfer."))
 		return

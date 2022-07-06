@@ -23,9 +23,8 @@ func NewAccountHandler(accountService *services.AccountService) *AccountHandler 
 }
 
 func (h AccountHandler) GetAccounts(w http.ResponseWriter, r *http.Request) {
-	accounts := h.accountService.GetAccounts()
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(accounts)
+	json.NewEncoder(w).Encode(h.accountService.GetAccounts())
 }
 
 func (h AccountHandler) CreateAccount(w http.ResponseWriter, r *http.Request) {
@@ -39,9 +38,9 @@ func (h AccountHandler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	created := h.accountService.CreateAccount(&account)
-	if !created {
-		log.Printf("Error creating the account.")
+	err = h.accountService.CreateAccount(&account)
+	if err != nil {
+		log.Printf("Error creating the account: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Error creating the account."))
 		return
@@ -54,7 +53,7 @@ func (h AccountHandler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 func (h AccountHandler) GetBalance(w http.ResponseWriter, r *http.Request) {
 	uriVars := mux.Vars(r)
 	accountId := uriVars["id"]
-	
+
 	ID, err := strconv.ParseInt(accountId, 10, 64)
 	if err != nil {
 		errMsg := fmt.Sprintf("Error when parsing the given ID.")
@@ -64,15 +63,15 @@ func (h AccountHandler) GetBalance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	balance, ok := h.accountService.GetBalance(ID)
-	if !ok {
-		errMsg := fmt.Sprintf("Account not found for the ID %v", ID)
+	balance, err := h.accountService.GetBalance(ID)
+	if err != nil {
+		errMsg := fmt.Sprintf("Error on getting the account balance: %v", err)
 		log.Println(errMsg)
-		w.WriteHeader(http.StatusNotFound)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(errMsg))
 		return
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(balance)
 }
