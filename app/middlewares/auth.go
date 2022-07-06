@@ -16,13 +16,14 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		}
 		
 		jwtService := services.NewJWTService()
-		err := jwtService.ValidateToken(tokenString)
+		claims, err := jwtService.ValidateToken(tokenString)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			w.Write([]byte(err.Error()))
 			return
 		}
 
+		w.Header().Add("cpf_authenticated", claims.Cpf)
 		next.ServeHTTP(w, r)
 	})
 }

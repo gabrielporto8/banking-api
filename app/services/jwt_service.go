@@ -40,7 +40,7 @@ func (s JWTService) GenerateJWT(cpf string) (token *models.Token, err error) {
 	return &models.Token{Token: tokenString}, err
 }
 
-func (s JWTService) ValidateToken(signedToken string) (err error) {
+func (s JWTService) ValidateToken(signedToken string) (claims *JWTClaim, err error) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&JWTClaim{},
@@ -49,14 +49,15 @@ func (s JWTService) ValidateToken(signedToken string) (err error) {
 		},
 	)
 	if err != nil {
-		return
+		return nil, err
 	}
 	claims, ok := token.Claims.(*JWTClaim)
+	
 	if !ok {
-		return ErrParseClaims
+		return nil, ErrParseClaims
 	}
 	if claims.ExpiresAt < time.Now().Local().Unix() {
-		return ErrExpiredToken
+		return nil, ErrExpiredToken
 	}
-	return
+	return claims, nil
 }

@@ -28,15 +28,15 @@ func main() {
 
 	r := mux.NewRouter()
 	
-	secure := r.PathPrefix("/auth").Subrouter()
+	secure := r.PathPrefix("/transfers").Subrouter()
 	secure.Use(middlewares.AuthMiddleware)
+	secure.HandleFunc("", transferHandler.GetTransfers).Methods("GET")
+	secure.HandleFunc("", transferHandler.CreateTransfer).Methods("POST")
 
-	secure.HandleFunc("/accounts", accountHandler.GetAccounts).Methods("GET")
-	
+	r.HandleFunc("/accounts", accountHandler.GetAccounts).Methods("GET")
 	r.HandleFunc("/accounts", accountHandler.CreateAccount).Methods("POST")
 	r.HandleFunc("/accounts/{id}/balance", accountHandler.GetBalance).Methods("GET")
-	r.HandleFunc("/transfers", transferHandler.GetTransfers).Methods("GET")
-	r.HandleFunc("/transfers", transferHandler.CreateTransfer).Methods("POST")
+	
 	r.HandleFunc("/login", authHandler.GenerateToken).Methods("POST")
 	
 	log.Fatal(http.ListenAndServe(":8080", r))

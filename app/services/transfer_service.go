@@ -23,22 +23,32 @@ func (s TransferService) GetTransfers() map[int64]*models.Transfer {
 	return s.transferRepository.GetTransfers()
 }
 
+func (s TransferService) GetTransfersByCPF(cpf string) ([]models.Transfer, error) {
+	account, err := s.accountService.GetAccountByCPF(cpf)
+	if err != nil {
+		return nil, err
+	}
+	return s.GetTransfersByOriginID(account.ID), nil
+}
+
 func (s TransferService) GetTransfersByOriginID(ID int64) []models.Transfer {
 	return s.transferRepository.GetTransfersByOriginID(ID)
 }
 
-func (s TransferService) CreateTransfer(transfer *models.Transfer) error {
+func (s TransferService) CreateTransfer(transfer *models.Transfer, cpf string) error {
+	accountOrigin, err := s.accountService.GetAccountByCPF(cpf)
+	if err != nil {
+		return err
+	}
+
+	transfer.AccountOriginID = accountOrigin.ID
+	
 	if transfer.AccountOriginID == transfer.AccountDestinationID {
 		return models.ErrSameAccountID
 	}
 
 	if transfer.Amount <= 0 {
 		return models.ErrInvalidAmount
-	}
-
-	accountOrigin, err := s.accountService.GetAccountByID(transfer.AccountOriginID)
-	if err != nil {
-		return err
 	}
 
 	accountDestination, err := s.accountService.GetAccountByID(transfer.AccountDestinationID)
