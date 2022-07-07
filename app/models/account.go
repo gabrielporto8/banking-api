@@ -2,16 +2,28 @@ package models
 
 import (
 	"errors"
+	"regexp"
 	"time"
 
+	"github.com/gabrielporto8/banking-api/app/errs"
+	"github.com/gabrielporto8/banking-api/app/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
 var (
+	CPFRules = regexp.MustCompile(`^\d{11}$`)
+
+	ErrNameRequired = errors.New("The name field is required!")
+	ErrCpfRequired = errors.New("The cpf field is required!")
+	ErrInvalidCpf = errors.New("Invalid cpf format!")
+	ErrInvalidSecret = errors.New("The secret must have at least 5 characters!")
+	ErrInvalidBalance = errors.New("The balance must be a positive value!")
+
 	ErrAccountNotFound = errors.New("account not found")
 	ErrAccountOriginNotFound = errors.New("account origin not found")
 	ErrAccountDestinationNotFound = errors.New("account destination not found")
 	ErrInsufficientBalance = errors.New("origin account does not have sufficient balance")
+	ErrAccountCPFAlreadyExists = errors.New("entered CPF already exists")
 )
 
 type Account struct {
@@ -23,20 +35,44 @@ type Account struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-func (account *Account) HashPassword(password string) error {
-	hashed, err := bcrypt.GenerateFromPassword([]byte(account.Secret), 14)
+func (a *Account) HashPassword(password string) *errs.AppError {
+	hashed, err := bcrypt.GenerateFromPassword([]byte(a.Secret), 14)
 	if err != nil {
-		return err
+		return errs.NewInternalError(err)
 	}
 
-	account.Secret = string(hashed)
+	a.Secret = string(hashed)
 	return nil
 }
 
-func (account *Account) CheckPassword(providedPassword string) error {
-	err := bcrypt.CompareHashAndPassword([]byte(account.Secret), []byte(providedPassword))
+func (a *Account) CheckPassword(providedPassword string) *errs.AppError {
+	err := bcrypt.CompareHashAndPassword([]byte(a.Secret), []byte(providedPassword))
 	if err != nil {
-		return err
+		return errs.NewUnauthorizedError(err)
 	}
+	return nil
+}
+
+func (a *Account) Validate() *errs.AppError {
+	if a.Name == "" {
+		return errs.NewValidationError(ErrNameRequired)
+	}
+
+	if a.Cpf == "" {
+		return errs.NewValidationError(ErrCpfRequired)
+	}
+
+	if !CPFRules.MatchString(utils.OnlyNumbersString(a.Cpf)) {
+		return errs.NewValidationError(ErrInvalidCpf)
+	}
+
+	if len(a.Secret) < 5 {
+		return errs.NewValidationError(ErrInvalidSecret)
+	}
+
+	if a.Balance < 0 {
+		return errs.NewValidationError(ErrInvalidBalance)
+	}
+
 	return nil
 }

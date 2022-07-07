@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"github.com/gabrielporto8/banking-api/app/errs"
 	"github.com/gabrielporto8/banking-api/app/models"
 )
 
@@ -31,7 +32,7 @@ func (r TransferRepository) GetTransfersByOriginID(ID int64) []models.Transfer {
 	return transfersFound
 }
 
-func (r TransferRepository) SaveTransfer(transfer *models.Transfer) error {
+func (r TransferRepository) SaveTransfer(transfer *models.Transfer) *errs.AppError {
 	transfer.ID = transfersLastID
 	transfers[transfersLastID] = transfer
 	transfersLastID++

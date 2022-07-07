@@ -20,10 +20,8 @@ func main() {
 	transferService := services.NewTransferService(transferRepository, accountService)
 	transferHandler := handlers.NewTransferHandler(transferService)
 
-	authRepository := repositories.NewAuthRepository()
-
 	jwtService := services.NewJWTService()
-	authService := services.NewAuthService(authRepository, accountRepository, jwtService)
+	authService := services.NewAuthService(accountService, jwtService)
 	authHandler := handlers.NewAuthHandler(authService)
 
 	r := mux.NewRouter()

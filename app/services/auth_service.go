@@ -1,26 +1,24 @@
 package services
 
 import (
+	"github.com/gabrielporto8/banking-api/app/errs"
 	"github.com/gabrielporto8/banking-api/app/models"
-	"github.com/gabrielporto8/banking-api/app/repositories"
 )
 
 type AuthService struct {
-	authReposiroty *repositories.AuthRepository
-	accountRepository *repositories.AccountRepository
+	accountService *AccountService
 	jwtService *JWTService
 }
 
-func NewAuthService(authRepository *repositories.AuthRepository, accountRepository *repositories.AccountRepository, jwtService *JWTService) *AuthService {
+func NewAuthService(accountService *AccountService, jwtService *JWTService) *AuthService {
 	return &AuthService{
-		authReposiroty: authRepository,
-		accountRepository: accountRepository,
+		accountService: accountService,
 		jwtService: jwtService,
 	}
 }
 
-func (s AuthService) GenerateToken(authentication *models.Authentication) (*models.Token, error){
-	account, err := s.accountRepository.GetAccountByCPF(authentication.Cpf)
+func (s AuthService) GenerateToken(authentication *models.Authentication) (*models.Token, *errs.AppError){
+	account, err := s.accountService.GetAccountByCPF(authentication.Cpf)
 	if err != nil {
 		return nil, err
 	}

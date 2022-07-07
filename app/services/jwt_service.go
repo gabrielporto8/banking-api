@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/gabrielporto8/banking-api/app/errs"
 	"github.com/gabrielporto8/banking-api/app/models"
 	"github.com/golang-jwt/jwt/v4"
 )
@@ -26,7 +27,7 @@ func NewJWTService() *JWTService {
 	return &JWTService{}
 }
 
-func (s JWTService) GenerateJWT(cpf string) (token *models.Token, err error) {
+func (s JWTService) GenerateJWT(cpf string) (*models.Token, *errs.AppError) {
 	expirationTime := time.Now().Add(30 * time.Minute).Unix()
 	claims := &JWTClaim{
 		Cpf: cpf,
@@ -36,11 +37,14 @@ func (s JWTService) GenerateJWT(cpf string) (token *models.Token, err error) {
 	}
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := jwtToken.SignedString(jwtSecretKey)
+	if err != nil {
+		return nil, errs.NewInternalError(err)
+	}
 
-	return &models.Token{Token: tokenString}, err
+	return &models.Token{Token: tokenString}, nil
 }
 
-func (s JWTService) ValidateToken(signedToken string) (claims *JWTClaim, err error) {
+func (s JWTService) ValidateToken(signedToken string) (*JWTClaim, *errs.AppError) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&JWTClaim{},
@@ -49,15 +53,15 @@ func (s JWTService) ValidateToken(signedToken string) (claims *JWTClaim, err err
 		},
 	)
 	if err != nil {
-		return nil, err
+		return nil, errs.NewUnauthorizedError(err)
 	}
 	claims, ok := token.Claims.(*JWTClaim)
 	
 	if !ok {
-		return nil, ErrParseClaims
+		return nil, errs.NewUnauthorizedError(ErrParseClaims)
 	}
 	if claims.ExpiresAt < time.Now().Local().Unix() {
-		return nil, ErrExpiredToken
+		return nil, errs.NewUnauthorizedError(ErrExpiredToken)
 	}
 	return claims, nil
 }

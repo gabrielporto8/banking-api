@@ -25,19 +25,16 @@ func (h AuthHandler) GenerateToken(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&authentication)
 	if err != nil {
 		log.Printf("Error decoding the body request: %v", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("invalid request"))
+		writeResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	
-	token, err := h.authService.GenerateToken(&authentication)
-	if err != nil {
-		log.Printf("Authentication error: %v", err)
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("Unauthorized."))
+	token, appError := h.authService.GenerateToken(&authentication)
+	if appError != nil {
+		log.Printf("Authentication error: %v", appError.Error())
+		writeResponse(w, appError.Code, appError.Error())
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(token)
+	writeResponse(w, http.StatusOK, token)
 }

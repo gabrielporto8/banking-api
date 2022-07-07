@@ -31,15 +31,13 @@ func (h TransferHandler) GetTransfers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	transfers, err := h.transferService.GetTransfersByCPF(cpf)
-	if err != nil {
-		log.Printf("Error when getting the transfers: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("invalid request"))
-		return
+	transfers, appError := h.transferService.GetTransfersByCPF(cpf)
+	if appError != nil {
+		log.Printf("Error when getting the transfers: %v", appError.Error())
+		writeResponse(w, appError.Code, appError.Error())
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(transfers)
+	
+	writeResponse(w, http.StatusAccepted, transfers)
 }
 
 func (h TransferHandler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
@@ -55,19 +53,16 @@ func (h TransferHandler) CreateTransfer(w http.ResponseWriter, r *http.Request) 
 	err := json.NewDecoder(r.Body).Decode(&transfer)
 	if err != nil {
 		log.Printf("Error decoding the body request: %v", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("invalid request"))
+		writeResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	
-	err = h.transferService.CreateTransfer(&transfer, cpf)
-	if err != nil {
-		log.Printf("Error creating the transfer: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error creating the transfer."))
+	appError := h.transferService.CreateTransfer(&transfer, cpf)
+	if appError != nil {
+		log.Printf("Error creating the transfer: %v", appError.Error())
+		writeResponse(w, appError.Code, appError.Error())
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(transfer)
+	writeResponse(w, http.StatusAccepted, transfer)
 }

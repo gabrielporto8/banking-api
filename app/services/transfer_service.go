@@ -3,6 +3,7 @@ package services
 import (
 	"time"
 
+	"github.com/gabrielporto8/banking-api/app/errs"
 	"github.com/gabrielporto8/banking-api/app/models"
 	"github.com/gabrielporto8/banking-api/app/repositories"
 )
@@ -23,7 +24,7 @@ func (s TransferService) GetTransfers() map[int64]*models.Transfer {
 	return s.transferRepository.GetTransfers()
 }
 
-func (s TransferService) GetTransfersByCPF(cpf string) ([]models.Transfer, error) {
+func (s TransferService) GetTransfersByCPF(cpf string) ([]models.Transfer, *errs.AppError) {
 	account, err := s.accountService.GetAccountByCPF(cpf)
 	if err != nil {
 		return nil, err
@@ -35,7 +36,7 @@ func (s TransferService) GetTransfersByOriginID(ID int64) []models.Transfer {
 	return s.transferRepository.GetTransfersByOriginID(ID)
 }
 
-func (s TransferService) CreateTransfer(transfer *models.Transfer, cpf string) error {
+func (s TransferService) CreateTransfer(transfer *models.Transfer, cpf string) *errs.AppError {
 	accountOrigin, err := s.accountService.GetAccountByCPF(cpf)
 	if err != nil {
 		return err
@@ -44,11 +45,11 @@ func (s TransferService) CreateTransfer(transfer *models.Transfer, cpf string) e
 	transfer.AccountOriginID = accountOrigin.ID
 	
 	if transfer.AccountOriginID == transfer.AccountDestinationID {
-		return models.ErrSameAccountID
+		return errs.NewConflictError(models.ErrSameAccountID)
 	}
 
 	if transfer.Amount <= 0 {
-		return models.ErrInvalidAmount
+		return errs.NewValidationError(models.ErrInvalidAmount)
 	}
 
 	accountDestination, err := s.accountService.GetAccountByID(transfer.AccountDestinationID)
@@ -57,7 +58,7 @@ func (s TransferService) CreateTransfer(transfer *models.Transfer, cpf string) e
 	}
 
 	if accountOrigin.Balance < transfer.Amount {
-		return models.ErrInsufficientBalance
+		return errs.NewValidationError(models.ErrInsufficientBalance)
 	}
 
 	transfer.CreatedAt = time.Now()

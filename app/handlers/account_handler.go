@@ -23,8 +23,8 @@ func NewAccountHandler(accountService *services.AccountService) *AccountHandler 
 }
 
 func (h AccountHandler) GetAccounts(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(h.accountService.GetAccounts())
+	accounts := h.accountService.GetAccounts()
+	writeResponse(w, http.StatusAccepted, accounts)
 }
 
 func (h AccountHandler) CreateAccount(w http.ResponseWriter, r *http.Request) {
@@ -33,21 +33,18 @@ func (h AccountHandler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&account)
 	if err != nil {
 		log.Printf("Error decoding the body request: %v", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("invalid request"))
+		writeResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	err = h.accountService.CreateAccount(&account)
-	if err != nil {
-		log.Printf("Error creating the account: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error creating the account."))
+	appError := h.accountService.CreateAccount(&account)
+	if appError != nil {
+		log.Printf("Error creating the account: %v", appError.Error())
+		writeResponse(w, appError.Code, appError.Error())
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(account)
+	writeResponse(w, http.StatusAccepted, account)
 }
 
 func (h AccountHandler) GetBalance(w http.ResponseWriter, r *http.Request) {
@@ -58,20 +55,16 @@ func (h AccountHandler) GetBalance(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		errMsg := fmt.Sprintf("Error when parsing the given ID.")
 		log.Println(errMsg)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(errMsg))
+		writeResponse(w, http.StatusBadRequest, errMsg)
 		return
 	}
 
-	balance, err := h.accountService.GetBalance(ID)
-	if err != nil {
-		errMsg := fmt.Sprintf("Error on getting the account balance: %v", err)
-		log.Println(errMsg)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(errMsg))
+	balance, appError := h.accountService.GetBalance(ID)
+	if appError != nil {
+		log.Println("Error on getting the account balance: %v", appError.Error())
+		writeResponse(w, appError.Code, appError.Error())
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(balance)
+	writeResponse(w, http.StatusAccepted, balance)
 }
