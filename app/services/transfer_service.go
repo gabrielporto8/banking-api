@@ -1,11 +1,17 @@
 package services
 
 import (
+	"errors"
 	"time"
 
 	"github.com/gabrielporto8/banking-api/app/errs"
 	"github.com/gabrielporto8/banking-api/app/models"
 	"github.com/gabrielporto8/banking-api/app/repositories"
+)
+
+var (
+	ErrAccountOriginNotFound = errors.New("Account origin not found.")
+	ErrAccountDestinationNotFound = errors.New("Account destination not found.")
 )
 
 type TransferService struct {
@@ -36,29 +42,45 @@ func (s TransferService) GetTransfersByOriginID(ID int64) []models.Transfer {
 	return s.transferRepository.GetTransfersByOriginID(ID)
 }
 
-func (s TransferService) CreateTransfer(transfer *models.Transfer, cpf string) *errs.AppError {
+func (s TransferService) CreateTransferFromRequest(transfer *models.Transfer, cpf string) *errs.AppError {
+	err := s.setAccountOriginIDByCPF(transfer, cpf)
+	if err != nil {
+		return err
+	}
+	
+	return s.CreateTransfer(transfer)
+}
+
+func (s TransferService) setAccountOriginIDByCPF(transfer *models.Transfer, cpf string) *errs.AppError {
 	accountOrigin, err := s.accountService.GetAccountByCPF(cpf)
 	if err != nil {
 		return err
 	}
 
 	transfer.AccountOriginID = accountOrigin.ID
-	
-	if transfer.AccountOriginID == transfer.AccountDestinationID {
-		return errs.NewConflictError(models.ErrSameAccountID)
-	}
 
-	if transfer.Amount <= 0 {
-		return errs.NewValidationError(models.ErrInvalidAmount)
-	}
+	return nil
+}
 
-	accountDestination, err := s.accountService.GetAccountByID(transfer.AccountDestinationID)
+func (s TransferService) CreateTransfer(transfer *models.Transfer) *errs.AppError {
+	err := transfer.Validate()
 	if err != nil {
 		return err
 	}
 
-	if accountOrigin.Balance < transfer.Amount {
-		return errs.NewValidationError(models.ErrInsufficientBalance)
+	_, err = s.accountService.GetAccountByID(transfer.AccountDestinationID)
+	if err != nil {
+		return errs.NewNotFoundError(ErrAccountDestinationNotFound)
+	}
+
+	accountOrigin, err := s.accountService.GetAccountByID(transfer.AccountOriginID)
+	if err != nil {
+		return errs.NewNotFoundError(ErrAccountOriginNotFound)
+	}
+
+	err = accountOrigin.ValidateTransferBalance(transfer.Amount)
+	if err != nil {
+		return err
 	}
 
 	transfer.CreatedAt = time.Now()
@@ -67,9 +89,10 @@ func (s TransferService) CreateTransfer(transfer *models.Transfer, cpf string) *
 		return err
 	}
 
-	accountOrigin.Balance, accountDestination.Balance = accountOrigin.Balance - transfer.Amount, accountDestination.Balance + transfer.Amount
-	s.accountService.UpdateAccount(accountOrigin)
-	s.accountService.UpdateAccount(accountDestination)
+	err = s.accountService.UpdateAccountBalanceFromTransfer(transfer)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

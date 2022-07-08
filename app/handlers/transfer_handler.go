@@ -2,15 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
 	"net/http"
 
 	"github.com/gabrielporto8/banking-api/app/models"
+	"github.com/gabrielporto8/banking-api/app/responses"
 	"github.com/gabrielporto8/banking-api/app/services"
 )
-
-var ErrHeaderNotFound = errors.New("failed when getting the data from authenticated user")
 
 type TransferHandler struct {
 	transferService *services.TransferService
@@ -23,29 +21,28 @@ func NewTransferHandler(transferService *services.TransferService) *TransferHand
 }
 
 func (h TransferHandler) GetTransfers(w http.ResponseWriter, r *http.Request) {
-	cpf := w.Header().Get("cpf_authenticated")
-	if len(cpf) == 0 {
-		log.Printf("Error: %v", ErrHeaderNotFound)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("invalid request"))
+	cpf, err := getAuthenticatedCpfFromRequestHeader(r)
+	if err != nil {
+		log.Printf("Error when getting CPF from header: %v", err.Error())
+		responses.WriteErrorResponse(w, err.Code, err.Error())
+		return
+	} 
+
+	transfers, err := h.transferService.GetTransfersByCPF(cpf)
+	if err != nil {
+		log.Printf("Error when getting the transfers: %v", err.Error())
+		responses.WriteErrorResponse(w, err.Code, err.Error())
 		return
 	}
-
-	transfers, appError := h.transferService.GetTransfersByCPF(cpf)
-	if appError != nil {
-		log.Printf("Error when getting the transfers: %v", appError.Error())
-		writeResponse(w, appError.Code, appError.Error())
-	}
 	
-	writeResponse(w, http.StatusAccepted, transfers)
+	responses.WriteResponse(w, http.StatusAccepted, transfers)
 }
 
 func (h TransferHandler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
-	cpf := w.Header().Get("cpf_authenticated")
-	if len(cpf) == 0 {
-		log.Printf("Error: %v", ErrHeaderNotFound)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("invalid request"))
+	cpf, appError := getAuthenticatedCpfFromRequestHeader(r)
+	if appError != nil {
+		log.Printf("Error when getting CPF from header: %v", appError.Error())
+		responses.WriteErrorResponse(w, appError.Code, appError.Error())
 		return
 	}
 	
@@ -53,16 +50,16 @@ func (h TransferHandler) CreateTransfer(w http.ResponseWriter, r *http.Request) 
 	err := json.NewDecoder(r.Body).Decode(&transfer)
 	if err != nil {
 		log.Printf("Error decoding the body request: %v", err)
-		writeResponse(w, http.StatusBadRequest, err.Error())
+		responses.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	
-	appError := h.transferService.CreateTransfer(&transfer, cpf)
+	appError = h.transferService.CreateTransferFromRequest(&transfer, cpf)
 	if appError != nil {
 		log.Printf("Error creating the transfer: %v", appError.Error())
-		writeResponse(w, appError.Code, appError.Error())
+		responses.WriteErrorResponse(w, appError.Code, appError.Error())
 		return
 	}
 
-	writeResponse(w, http.StatusAccepted, transfer)
+	responses.WriteResponse(w, http.StatusAccepted, transfer)
 }

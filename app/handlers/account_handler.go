@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gabrielporto8/banking-api/app/models"
+	"github.com/gabrielporto8/banking-api/app/responses"
 	"github.com/gabrielporto8/banking-api/app/services"
 	"github.com/gorilla/mux"
 )
@@ -24,7 +25,7 @@ func NewAccountHandler(accountService *services.AccountService) *AccountHandler 
 
 func (h AccountHandler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 	accounts := h.accountService.GetAccounts()
-	writeResponse(w, http.StatusAccepted, accounts)
+	responses.WriteResponse(w, http.StatusAccepted, accounts)
 }
 
 func (h AccountHandler) CreateAccount(w http.ResponseWriter, r *http.Request) {
@@ -33,18 +34,18 @@ func (h AccountHandler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&account)
 	if err != nil {
 		log.Printf("Error decoding the body request: %v", err)
-		writeResponse(w, http.StatusBadRequest, err.Error())
+		responses.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	appError := h.accountService.CreateAccount(&account)
 	if appError != nil {
 		log.Printf("Error creating the account: %v", appError.Error())
-		writeResponse(w, appError.Code, appError.Error())
+		responses.WriteErrorResponse(w, appError.Code, appError.Error())
 		return
 	}
 
-	writeResponse(w, http.StatusAccepted, account)
+	responses.WriteResponse(w, http.StatusAccepted, account)
 }
 
 func (h AccountHandler) GetBalance(w http.ResponseWriter, r *http.Request) {
@@ -55,16 +56,16 @@ func (h AccountHandler) GetBalance(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		errMsg := fmt.Sprintf("Error when parsing the given ID.")
 		log.Println(errMsg)
-		writeResponse(w, http.StatusBadRequest, errMsg)
+		responses.WriteErrorResponse(w, http.StatusBadRequest, errMsg)
 		return
 	}
 
 	balance, appError := h.accountService.GetBalance(ID)
 	if appError != nil {
-		log.Println("Error on getting the account balance: %v", appError.Error())
-		writeResponse(w, appError.Code, appError.Error())
+		log.Printf("Error on getting the account balance: %v", appError.Error())
+		responses.WriteErrorResponse(w, appError.Code, appError.Error())
 		return
 	}
 
-	writeResponse(w, http.StatusAccepted, balance)
+	responses.WriteResponse(w, http.StatusAccepted, balance)
 }

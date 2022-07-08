@@ -13,17 +13,15 @@ import (
 var (
 	CPFRules = regexp.MustCompile(`^\d{11}$`)
 
-	ErrNameRequired = errors.New("The name field is required!")
-	ErrCpfRequired = errors.New("The cpf field is required!")
-	ErrInvalidCpf = errors.New("Invalid cpf format!")
-	ErrInvalidSecret = errors.New("The secret must have at least 5 characters!")
-	ErrInvalidBalance = errors.New("The balance must be a positive value!")
+	ErrNameRequired = errors.New("The name field is required.")
+	ErrCpfRequired = errors.New("The cpf field is required.")
+	ErrInvalidCpf = errors.New("Invalid CPF format.")
+	ErrInvalidSecret = errors.New("The secret must have at least 8 characters.")
+	ErrInvalidBalance = errors.New("The balance must be a positive value.")
 
-	ErrAccountNotFound = errors.New("account not found")
-	ErrAccountOriginNotFound = errors.New("account origin not found")
-	ErrAccountDestinationNotFound = errors.New("account destination not found")
-	ErrInsufficientBalance = errors.New("origin account does not have sufficient balance")
-	ErrAccountCPFAlreadyExists = errors.New("entered CPF already exists")
+	ErrAccountNotFound = errors.New("Account not found.")
+	ErrInsufficientBalance = errors.New("Origin account does not have sufficient balance.")
+	ErrAccountCPFAlreadyExists = errors.New("Entered CPF already exists.")
 )
 
 type Account struct {
@@ -66,12 +64,20 @@ func (a *Account) Validate() *errs.AppError {
 		return errs.NewValidationError(ErrInvalidCpf)
 	}
 
-	if len(a.Secret) < 5 {
+	if len(a.Secret) < 8 {
 		return errs.NewValidationError(ErrInvalidSecret)
 	}
 
 	if a.Balance < 0 {
 		return errs.NewValidationError(ErrInvalidBalance)
+	}
+
+	return nil
+}
+
+func (a *Account) ValidateTransferBalance(amount float64) *errs.AppError {
+	if a.Balance < amount {
+		return errs.NewValidationError(ErrInsufficientBalance)
 	}
 
 	return nil

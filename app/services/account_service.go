@@ -57,6 +57,31 @@ func (s AccountService) CreateAccount(account *models.Account) *errs.AppError {
 	return s.accountRepository.SaveAccount(account)
 }
 
+func (s AccountService) UpdateAccountBalanceFromTransfer(transfer *models.Transfer) *errs.AppError {
+	accountOrigin, err := s.GetAccountByID(transfer.AccountOriginID)
+	if err != nil {
+		return err
+	}
+
+	accountDestination, err := s.GetAccountByID(transfer.AccountDestinationID)
+	if err != nil {
+		return err
+	}
+	
+	accountOrigin.Balance, accountDestination.Balance = accountOrigin.Balance - transfer.Amount, accountDestination.Balance + transfer.Amount
+	_, err = s.UpdateAccount(accountOrigin)
+	if err != nil {
+		return err
+	}
+
+	_, err = s.UpdateAccount(accountDestination)
+	if err != nil {
+		return err
+	}
+	
+	return nil
+}
+
 func (s AccountService) UpdateAccount(account *models.Account) (*models.Account, *errs.AppError) {
 	return s.accountRepository.UpdateAccount(account)
 }

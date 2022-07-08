@@ -1,14 +1,19 @@
 package handlers
 
 import (
-	"encoding/json"
+	"errors"
 	"net/http"
+
+	"github.com/gabrielporto8/banking-api/app/errs"
 )
 
-func writeResponse(w http.ResponseWriter, code int, data interface{}) {
-	w.Header().Add("Content-type", "application/json")
-	w.WriteHeader(code)
-	if err := json.NewEncoder(w).Encode(data); err != nil {
-		panic(err)
+var ErrHeaderNotFound = errors.New("Failed when getting the data from authenticated user.")
+
+func getAuthenticatedCpfFromRequestHeader(r *http.Request) (string, *errs.AppError) {
+	cpf := r.Header.Get("Authenticated-CPF")
+	if len(cpf) == 0 {
+		return "", errs.NewUnauthorizedError(ErrHeaderNotFound)
 	}
+
+	return cpf, nil
 }
