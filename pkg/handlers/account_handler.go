@@ -67,5 +67,5 @@ func (h AccountHandler) GetBalance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responses.WriteResponse(w, http.StatusAccepted, balance)
+	responses.WriteResponse(w, http.StatusAccepted, map[string]float64 {"Balance": balance})
 }
