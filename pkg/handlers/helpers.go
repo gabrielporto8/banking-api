@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/gabrielporto8/banking-api/app/errs"
+	"github.com/gabrielporto8/banking-api/pkg/errs"
 )
 
 var ErrHeaderNotFound = errors.New("Failed when getting the data from authenticated user.")

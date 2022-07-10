@@ -1,8 +1,8 @@
 package repositories
 
 import (
-	"github.com/gabrielporto8/banking-api/app/errs"
-	"github.com/gabrielporto8/banking-api/app/models"
+	"github.com/gabrielporto8/banking-api/pkg/errs"
+	"github.com/gabrielporto8/banking-api/pkg/models"
 )
 
 var (

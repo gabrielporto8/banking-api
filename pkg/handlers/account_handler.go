@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gabrielporto8/banking-api/app/models"
-	"github.com/gabrielporto8/banking-api/app/responses"
-	"github.com/gabrielporto8/banking-api/app/services"
+	"github.com/gabrielporto8/banking-api/pkg/models"
+	"github.com/gabrielporto8/banking-api/pkg/responses"
+	"github.com/gabrielporto8/banking-api/pkg/services"
 	"github.com/gorilla/mux"
 )
 

@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gabrielporto8/banking-api/app/responses"
-	"github.com/gabrielporto8/banking-api/app/services"
+	"github.com/gabrielporto8/banking-api/pkg/responses"
+	"github.com/gabrielporto8/banking-api/pkg/services"
 )
 
 func AuthMiddleware(next http.Handler) http.Handler {

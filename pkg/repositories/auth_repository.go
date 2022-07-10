@@ -1,6 +1,6 @@
 package repositories
 
-import "github.com/gabrielporto8/banking-api/app/models"
+import "github.com/gabrielporto8/banking-api/pkg/models"
 
 type AuthRepository struct {}
 

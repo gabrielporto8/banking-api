@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/gabrielporto8/banking-api/app/errs"
+	"github.com/gabrielporto8/banking-api/pkg/errs"
 )
 
 var (

@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/gabrielporto8/banking-api/app/errs"
-	"github.com/gabrielporto8/banking-api/app/utils"
+	"github.com/gabrielporto8/banking-api/pkg/errs"
+	"github.com/gabrielporto8/banking-api/pkg/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 

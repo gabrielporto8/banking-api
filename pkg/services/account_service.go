@@ -1,10 +1,10 @@
 package services
 
 import (
-	"github.com/gabrielporto8/banking-api/app/errs"
-	"github.com/gabrielporto8/banking-api/app/models"
-	"github.com/gabrielporto8/banking-api/app/repositories"
-	"github.com/gabrielporto8/banking-api/app/utils"
+	"github.com/gabrielporto8/banking-api/pkg/errs"
+	"github.com/gabrielporto8/banking-api/pkg/models"
+	"github.com/gabrielporto8/banking-api/pkg/repositories"
+	"github.com/gabrielporto8/banking-api/pkg/utils"
 )
 
 type AccountService struct {

@@ -4,10 +4,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gabrielporto8/banking-api/app/handlers"
-	"github.com/gabrielporto8/banking-api/app/middlewares"
-	"github.com/gabrielporto8/banking-api/app/repositories"
-	"github.com/gabrielporto8/banking-api/app/services"
+	"github.com/gabrielporto8/banking-api/pkg/handlers"
+	"github.com/gabrielporto8/banking-api/pkg/middlewares"
+	"github.com/gabrielporto8/banking-api/pkg/repositories"
+	"github.com/gabrielporto8/banking-api/pkg/services"
 	"github.com/gorilla/mux"
 )
 
