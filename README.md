@@ -1,1 +1,1 @@
-# stone-challenge
+# banking-api
