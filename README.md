@@ -220,6 +220,9 @@ Responses:
 
 Só é possível criar uma conta por CPF.
 
+### Login
+O token gerado na autenticação tem validade de 30 minutos. Após isso, ele será expirado e será necessário gerar um novo token.
+
 ### Transfer
 - Account_destination_id: ID de um account existente, esse ID não pode ser o ID do usuário autenticado.
 - Amount: valor a ser transferido. Deve ser um valor > 0 e o valor deve ser >= ao valor do saldo da conta do usuário autenticado. 
