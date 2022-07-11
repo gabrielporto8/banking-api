@@ -7,19 +7,20 @@ import (
 	"github.com/gabrielporto8/banking-api/pkg/models"
 )
 
-var (
-	accounts map[int64]*models.Account = make(map[int64]*models.Account)
-	accountsLastID int64 = 0
-)
+var accountsLastID int64 = 0
 
-type AccountRepository struct {}
+type AccountRepository struct {
+	accounts map[int64]*models.Account
+}
 
-func NewAccountRepository() *AccountRepository {
-	return &AccountRepository{}
+func NewAccountRepository(accounts map[int64]*models.Account) *AccountRepository {
+	return &AccountRepository{
+		accounts: accounts,
+	}
 }
 
 func (r AccountRepository) GetAccountByID(ID int64) (*models.Account, *errs.AppError) {
-	accs, ok := accounts[ID]
+	accs, ok := r.accounts[ID]
 	if !ok {
 		return nil, errs.NewNotFoundError(models.ErrAccountNotFound)
 	}
@@ -27,7 +28,7 @@ func (r AccountRepository) GetAccountByID(ID int64) (*models.Account, *errs.AppE
 }
 
 func (r AccountRepository) GetAccountByCPF(cpf string) (*models.Account, *errs.AppError) {
-	for _, acc := range accounts {
+	for _, acc := range r.accounts {
 		if acc.Cpf == cpf {
 			return acc, nil
 		}
@@ -37,11 +38,11 @@ func (r AccountRepository) GetAccountByCPF(cpf string) (*models.Account, *errs.A
 }
 
 func (r AccountRepository) GetAccounts() map[int64]*models.Account {
-	return accounts
+	return r.accounts
 }
 
 func (r AccountRepository) GetBalance(ID int64) (float64, *errs.AppError) {
-	account, ok := accounts[ID]
+	account, ok := r.accounts[ID]
 	if !ok {
 		return 0, errs.NewNotFoundError(models.ErrAccountNotFound)
 	}
@@ -52,18 +53,18 @@ func (r AccountRepository) GetBalance(ID int64) (float64, *errs.AppError) {
 func (r AccountRepository) SaveAccount(account *models.Account) *errs.AppError {
 	account.ID = accountsLastID
 	account.CreatedAt = time.Now()
-	accounts[accountsLastID] = account
+	r.accounts[accountsLastID] = account
 	accountsLastID++
 
 	return nil
 }
 
 func (r AccountRepository) UpdateAccount(account *models.Account) (*models.Account, *errs.AppError) {
-	_, ok := accounts[account.ID]
+	_, ok := r.accounts[account.ID]
 	if !ok {
 		return nil, errs.NewNotFoundError(models.ErrAccountNotFound)
 	}
 
-	accounts[account.ID] = account
+	r.accounts[account.ID] = account
 	return account, nil
 }

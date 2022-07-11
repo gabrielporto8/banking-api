@@ -6,6 +6,7 @@ import (
 
 	"github.com/gabrielporto8/banking-api/pkg/handlers"
 	"github.com/gabrielporto8/banking-api/pkg/middlewares"
+	"github.com/gabrielporto8/banking-api/pkg/models"
 	"github.com/gabrielporto8/banking-api/pkg/repositories"
 	"github.com/gabrielporto8/banking-api/pkg/services"
 	"github.com/gorilla/mux"
@@ -33,11 +34,11 @@ func Run() {
 }
 
 func setHandlers() {
-	accountRepository = repositories.NewAccountRepository()
+	accountRepository = repositories.NewAccountRepository(make(map[int64]*models.Account))
 	accountService = services.NewAccountService(accountRepository)
 	accountHandler = handlers.NewAccountHandler(accountService)
 
-	transferRepository = repositories.NewTransferRepository()
+	transferRepository = repositories.NewTransferRepository(make(map[int64]*models.Transfer))
 	transferService = services.NewTransferService(transferRepository, accountService)
 	transferHandler = handlers.NewTransferHandler(transferService)
 
