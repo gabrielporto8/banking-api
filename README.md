@@ -109,7 +109,7 @@ Responses:
   
 ### Login
 #### `POST http://localhost:8080/login`
-Endpoint responsável por realizar o login.
+Endpoint responsável por realizar o login. A autenticação é realizada com JWT.
 
 Body da requisição:
 ```json
@@ -146,3 +146,80 @@ Endpoint responsável por listar as transferências do usuário logado.
 
 Header da requisição:
 `"Authorization: Bearer token123"`
+
+Responses:
+- Sucesso
+  - HTTP Status 202
+  - Body:
+  ```json
+  [
+	{
+		"id": 0,
+		"account_origin_id": 0,
+		"account_destination_id": 1,
+		"amount": 20,
+		"created_at": "2022-07-11T14:32:11.048949-03:00"
+	},
+	{
+		"id": 1,
+		"account_origin_id": 0,
+		"account_destination_id": 1,
+		"amount": 5,
+		"created_at": "2022-07-11T14:32:26.844285-03:00"
+	},
+	{
+		"id": 2,
+		"account_origin_id": 0,
+		"account_destination_id": 1,
+		"amount": 15,
+		"created_at": "2022-07-11T14:32:48.413357-03:00"
+	}
+  ]
+  ```
+- Erro
+  - HTTP Status 401 (Unauthorized)
+
+#### `POST http://localhost:8080/transfers`
+Endpoint responsável por realizar uma transferência do usuário logado.
+
+Header da requisição:
+`"Authorization: Bearer token123"`
+
+Body da requisição:
+```json
+{
+  "account_destination_id": 1
+  "amount": 20
+}
+```
+
+Responses:
+- Sucesso
+  - HTTP Status Code 202
+  - Body:
+  ```json
+  {
+	"id": 0,
+	"account_origin_id": 0,
+	"account_destination_id": 1,
+	"amount": 20,
+	"created_at": "2022-07-11T15:33:32.404014-03:00"
+  }
+  ```
+- Erro
+  - HTTP Status Code 400
+  - HTTP Status Code 409
+  - HTTP Status Code 404
+
+## Regras
+### Account
+- Name: o campo nome é obrigatorio
+- Cpf: o campo CPF deve ter 11 numeros. E possivel passar uma string com caracteres especiais, a string sera sanitizada e o resultado deve ter 11 numeros.
+- Secret: o password deve ter no minimo 8 caracteres
+- Balance: o saldo deve ser um valor > 0
+
+Só é possível criar uma conta por CPF.
+
+### Transfer
+- Account_destination_id: ID de um account existente, esse ID não pode ser o ID do usuário autenticado.
+- Amount: valor a ser transferido. Deve ser um valor > 0 e o valor deve ser >= ao valor do saldo da conta do usuário autenticado. 
